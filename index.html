@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusNest AI - Student Relocation Assistant</title>
+  <meta name="description" content="CampusNest AI is an intelligent relocation assistant that helps students find PGs, hostels, estimate living expenses, and find the safest neighborhoods.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container nav-container">
+      <div class="logo">
+        <i class="fa-solid fa-hotel"></i>
+        <span>CampusNest AI</span>
+      </div>
+      <div class="ai-status">
+        <div class="ai-pulse-dot"></div>
+        <span>5 AI Agents Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero container">
+    <div class="hero-tagline">AI Relocation Assistant for Students</div>
+    <h1>Find the Right Place Before You Find Your Classroom.</h1>
+    <p>Empowering students to find good PGs, estimate total expenses, analyze area safety, and map commutes using specialized collaborative AI agents.</p>
+  </section>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="app-grid">
+      
+      <!-- Left Column: Search Form -->
+      <section class="glass-card search-card">
+        <h2><i class="fa-solid fa-sliders"></i> relocation criteria</h2>
+        <form id="relocation-form">
+          
+          <!-- College Name -->
+          <div class="form-group">
+            <label for="college-name">Target College / University</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-graduation-cap"></i>
+              <input type="text" id="college-name" placeholder="Enter college name..." required autocomplete="off">
+            </div>
+            <div class="suggestions-list" id="suggestions-list">
+              <!-- Seeded colleges will render here dynamically -->
+            </div>
+          </div>
+
+          <!-- Budget -->
+          <div class="form-group">
+            <label for="budget-range">Monthly Room Budget: <span id="budget-val" style="color: var(--accent-amber); font-family: var(--font-mono); font-weight: 700;">₹10,000</span></label>
+            <div class="slider-container">
+              <input type="range" id="budget-range" class="range-slider" min="4000" max="22000" step="500" value="10000">
+              <div class="slider-labels">
+                <span>₹4k</span>
+                <span>₹13k</span>
+                <span>₹22k</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gender Preference -->
+          <div class="form-group">
+            <label>Gender Preference</label>
+            <div class="grid-select" data-group="gender-input">
+              <div class="select-card active" data-value="Any">
+                <input type="radio" name="gender-input" value="Any" checked>Any
+              </div>
+              <div class="select-card" data-value="Male">
+                <input type="radio" name="gender-input" value="Male">Male
+              </div>
+              <div class="select-card" data-value="Female">
+                <input type="radio" name="gender-input" value="Female">Female
+              </div>
+            </div>
+          </div>
+
+          <!-- Food Preference -->
+          <div class="form-group">
+            <label>Food Preference</label>
+            <div class="grid-select grid-select-2" data-group="food-input">
+              <div class="select-card active" data-value="Any">
+                <input type="radio" name="food-input" value="Any" checked>Any Preference
+              </div>
+              <div class="select-card" data-value="Veg Only">
+                <input type="radio" name="food-input" value="Veg Only">Veg Only
+              </div>
+              <div class="select-card" data-value="Self-Cook">
+                <input type="radio" name="food-input" value="Self-Cook">Self-Cooking
+              </div>
+            </div>
+          </div>
+
+          <!-- Room Sharing -->
+          <div class="form-group">
+            <label>Room Sharing Type</label>
+            <div class="grid-select" data-group="sharing-input">
+              <div class="select-card active" data-value="Any">
+                <input type="radio" name="sharing-input" value="Any" checked>Any
+              </div>
+              <div class="select-card" data-value="Single">
+                <input type="radio" name="sharing-input" value="Single">Single
+              </div>
+              <div class="select-card" data-value="Double">
+                <input type="radio" name="sharing-input" value="Double">Double
+              </div>
+            </div>
+          </div>
+
+          <!-- Distance Threshold -->
+          <div class="form-group">
+            <label for="distance-input">Max Distance Preference</label>
+            <select id="distance-input">
+              <option value="99" selected>No distance limit</option>
+              <option value="1.0">Walking distance (&lt; 1.0 km)</option>
+              <option value="2.0">Short Commute (&lt; 2.0 km)</option>
+              <option value="3.5">Medium Commute (&lt; 3.5 km)</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-primary" id="btn-submit">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Find Campus Nest</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Right Column: Agents and Recommendations -->
+      <section class="main-workspace">
+        
+        <!-- Agent Collaboration Panel -->
+        <div class="glass-card agent-hub-card" id="agent-hub-panel">
+          <h2>
+            <span><i class="fa-solid fa-network-wired"></i> Multi-Agent Hive Mind</span>
+            <span id="agent-status-label" style="font-size: 13px; font-weight: 500; color: var(--text-muted);">Idle - Awaiting Inputs</span>
+          </h2>
+          
+          <div class="agent-grid">
+            <div class="agent-connections">
+              <div class="agent-connection-flow" id="agent-flow-bar"></div>
+            </div>
+            
+            <div class="agent-node discovery" id="agent-node-discovery">
+              <div class="agent-icon-wrapper"><i class="fa-solid fa-magnifying-glass-location"></i></div>
+              <span>Discovery</span>
+            </div>
+            <div class="agent-node safety" id="agent-node-safety">
+              <div class="agent-icon-wrapper"><i class="fa-solid fa-shield-halved"></i></div>
+              <span>Safety</span>
+            </div>
+            <div class="agent-node budget" id="agent-node-budget">
+              <div class="agent-icon-wrapper"><i class="fa-solid fa-wallet"></i></div>
+              <span>Budget</span>
+            </div>
+            <div class="agent-node advisor" id="agent-node-advisor">
+              <div class="agent-icon-wrapper"><i class="fa-solid fa-map-location-dot"></i></div>
+              <span>Area Advisor</span>
+            </div>
+            <div class="agent-node commute" id="agent-node-commute">
+              <div class="agent-icon-wrapper"><i class="fa-solid fa-route"></i></div>
+              <span>Commute</span>
+            </div>
+          </div>
+
+          <!-- Live Terminal Output -->
+          <div class="terminal-wrapper">
+            <div class="terminal-header">
+              <div class="terminal-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <div>campusnest-hive-log.txt</div>
+            </div>
+            <div id="terminal-log">
+              <div class="terminal-log-entry">
+                <span class="timestamp">13:08:19</span>
+                <span class="tag tag-system">[SYS]</span>
+                <span class="msg">CampusNest AI Core initialized. Enter target college and relocation constraints to trigger multi-agent planning.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendations Dashboard (Initially Hidden) -->
+        <div id="results-panel" class="hidden">
+          <div class="results-container">
+            
+            <!-- Recommendations Sidebar -->
+            <div class="recs-sidebar">
+              <div class="recs-header-info" id="recs-count-label">Found 4 recommended nests</div>
+              <div id="pg-cards-list">
+                <!-- Cards will render here -->
+              </div>
+            </div>
+            
+            <!-- Selected PG Detail Report -->
+            <div class="glass-card report-card" id="pg-detail-report">
+              <!-- Report header -->
+              <div class="report-header">
+                <div class="report-title-row">
+                  <div>
+                    <h3 id="report-pg-name">Stanza Living Hudson House</h3>
+                    <div class="pg-locality" id="report-pg-locality"><i class="fa-solid fa-location-dot"></i> Hudson Lane, Delhi</div>
+                  </div>
+                  <span class="pg-badge female" id="report-pg-gender-badge">Female Only</span>
+                </div>
+                
+                <!-- Report Tabs -->
+                <div class="report-tabs">
+                  <button class="tab-btn active" data-tab="tab-overview">Overview</button>
+                  <button class="tab-btn" data-tab="tab-safety">Safety</button>
+                  <button class="tab-btn" data-tab="tab-budget">Budget</button>
+                  <button class="tab-btn" data-tab="tab-advisor">Area Advice</button>
+                  <button class="tab-btn" data-tab="tab-commute">Commute</button>
+                </div>
+              </div>
+
+              <!-- Tab Contents -->
+              
+              <!-- Tab 1: Overview -->
+              <div class="tab-content active" id="tab-overview">
+                <div class="report-summary-grid">
+                  <div class="summary-metric-card">
+                    <h4><i class="fa-solid fa-road" style="color: var(--accent-indigo);"></i> Distance to College</h4>
+                    <div class="val" id="overview-distance">1.2 km</div>
+                    <div class="subval" id="overview-commute-sub">~15 mins walk</div>
+                  </div>
+                  <div class="summary-metric-card">
+                    <h4><i class="fa-solid fa-money-bill-wave" style="color: var(--accent-amber);"></i> Monthly Room Rent</h4>
+                    <div class="val" id="overview-rent">₹8,500</div>
+                    <div class="subval" id="overview-food-sub">Food: Included</div>
+                  </div>
+                </div>
+
+                <!-- Custom SVG Map View -->
+                <div class="map-canvas-container">
+                  <div class="map-overlay-legend">
+                    <div class="map-legend-item college"><span></span> College</div>
+                    <div class="map-legend-item pg"><span></span> Nest</div>
+                    <div class="map-legend-item safe"><span></span> Safety Zone</div>
+                  </div>
+                  <svg class="map-svg" viewBox="0 0 400 240" id="map-svg-element">
+                    <!-- Procedural Map SVG will render here -->
+                  </svg>
+                </div>
+
+                <div class="summary-metric-card">
+                  <h4><i class="fa-solid fa-sparkles" style="color: var(--primary);"></i> Why this PG? (AI Recommendation)</h4>
+                  <p id="overview-ai-summary" style="font-size: 13.5px; line-height: 1.6; color: var(--text-muted); margin-top: 8px;">
+                    This accommodation matches your budget perfectly. It includes Veg meals, offers a safe residential locality, and sits within walking distance of the campus.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Tab 2: Safety -->
+              <div class="tab-content" id="tab-safety">
+                <div class="safety-header">
+                  <div>
+                    <h4 style="font-size: 14px; font-weight: 700; color: var(--accent-emerald);">Safety Verification</h4>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Analyzed by Safety Agent</div>
+                  </div>
+                  <div class="safety-rating-details">
+                    <span class="safety-rating-val" id="safety-rating-display">8.7</span>
+                    <span style="font-size: 14px; font-weight: 700; color: var(--accent-emerald);">/ 10</span>
+                  </div>
+                </div>
+
+                <div class="safety-tag-cloud">
+                  <div class="safety-tag"><i class="fa-solid fa-shield"></i> CCTV Secured</div>
+                  <div class="safety-tag"><i class="fa-solid fa-user-shield"></i> Warden 24/7</div>
+                  <div class="safety-tag"><i class="fa-solid fa-lightbulb"></i> Well-lit Streets</div>
+                </div>
+
+                <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;"><i class="fa-solid fa-comments"></i> Student Reviews Analysis</h4>
+                <div class="safety-reviews-list" id="safety-reviews-list">
+                  <!-- Reviews will render here -->
+                </div>
+              </div>
+
+              <!-- Tab 3: Budget Breakdown -->
+              <div class="tab-content" id="tab-budget">
+                <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px;"><i class="fa-solid fa-calculator"></i> Total Monthly Expense Estimator</h4>
+                <div class="budget-card">
+                  <div class="budget-line-item">
+                    <div class="label"><i class="fa-solid fa-bed"></i> Room Rent (Base sharing cost)</div>
+                    <div class="cost" id="budget-rent-val">₹8,500</div>
+                  </div>
+                  <div class="budget-line-item">
+                    <div class="label"><i class="fa-solid fa-utensils"></i> Estimated Food Cost</div>
+                    <div class="cost" id="budget-food-val">₹0 (Included)</div>
+                  </div>
+                  <div class="budget-line-item">
+                    <div class="label"><i class="fa-solid fa-bus"></i> Estimated Travel / Transit</div>
+                    <div class="cost" id="budget-commute-val">₹600</div>
+                  </div>
+                  <div class="budget-line-item">
+                    <div class="label"><i class="fa-solid fa-bolt"></i> Electricity & Utility Charges</div>
+                    <div class="cost">₹800</div>
+                  </div>
+                  
+                  <div class="budget-total-row">
+                    <span class="label">Total Monthly Outflow</span>
+                    <span class="cost" id="budget-total-val">₹9,900</span>
+                  </div>
+                </div>
+                <div style="font-size: 12px; color: var(--text-dark); text-align: center; font-style: italic;">
+                  *Calculated based on commute distance to college and food inclusions.
+                </div>
+              </div>
+
+              <!-- Tab 4: Area Advice -->
+              <div class="tab-content" id="tab-advisor">
+                <div class="advice-box">
+                  <span class="advice-badge" id="advice-tag-badge">Most student-friendly</span>
+                  <div class="advice-title" id="advice-title">Kamla Nagar</div>
+                  <div class="advice-desc" id="advice-description">
+                    Kamla Nagar is widely known as DU's primary student hub. Packed with retail shops, library rooms, and vibrant street food lanes, it offers a dense social experience.
+                  </div>
+                </div>
+
+                <div class="area-stats-grid">
+                  <div class="area-stat-card">
+                    <div class="lbl">Area Safety</div>
+                    <div class="val" id="area-safety-val">8.5 / 10</div>
+                  </div>
+                  <div class="area-stat-card">
+                    <div class="lbl">Crowd Index</div>
+                    <div class="val">High Student Density</div>
+                  </div>
+                  <div class="area-stat-card">
+                    <div class="lbl">Average Rent</div>
+                    <div class="val" id="area-rent-val">₹10,500/mo</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 5: Commute Times -->
+              <div class="tab-content" id="tab-commute">
+                <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-clock"></i> Commute Breakdown to Campus</h4>
+                <div class="commute-cards-grid">
+                  <div class="commute-time-card">
+                    <i class="fa-solid fa-person-walking"></i>
+                    <div class="mode">Walking</div>
+                    <div class="time" id="commute-walk-time">15 min</div>
+                  </div>
+                  <div class="commute-time-card">
+                    <i class="fa-solid fa-bus"></i>
+                    <div class="mode">Bus Transit</div>
+                    <div class="time" id="commute-bus-time">8 min</div>
+                  </div>
+                  <div class="commute-time-card">
+                    <i class="fa-solid fa-motorcycle"></i>
+                    <div class="mode">Two-Wheeler</div>
+                    <div class="time" id="commute-bike-time">4 min</div>
+                  </div>
+                </div>
+
+                <div class="commute-route-detail">
+                  <h4><i class="fa-solid fa-map-signs"></i> Route Recommendation</h4>
+                  <p id="commute-route-desc">
+                    Since the distance is 1.2 km, walking is the most economical and healthier route. During peak traffic hours, a bicycle or two-wheeler is highly efficient. Avoid local buses as wait times are often longer than transit times.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
